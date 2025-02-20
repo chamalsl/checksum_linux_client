@@ -1,0 +1,25 @@
+VERSION=$(<VERSION)
+echo "Creating release for version - ${VERSION}"
+RELEASE_FILE=checksums_${VERSION}_amd64
+RELEASE_DIR=release/Ubuntu24/${RELEASE_FILE}
+mkdir -p ${RELEASE_DIR}/usr/local/bin
+mkdir -p ${RELEASE_DIR}/DEBIAN
+touch ${RELEASE_DIR}/DEBIAN/control
+cp build/release/checksums release/Ubuntu24/
+cp build/release/checksums ${RELEASE_DIR}/usr/local/bin/is-online
+
+echo "Package: checksums" > ${RELEASE_DIR}/DEBIAN/control
+echo "Version: ${VERSION}" >> ${RELEASE_DIR}/DEBIAN/control
+echo "Architecture: amd64" >> ${RELEASE_DIR}/DEBIAN/control
+echo "Maintainer: Chamal De Silva <chamaldesilva@gmail.com>" >> ${RELEASE_DIR}/DEBIAN/control
+echo "Description: Program which verifies checksum of a file." >> ${RELEASE_DIR}/DEBIAN/control
+echo "Depends: libgtkmm-3.0-1t64 (>= 3.24.9), libcurl4t64 (>= 7.16.2) , libsqlite3-0 (>= 3.5.9)" >> ${RELEASE_DIR}/DEBIAN/control
+cd release/Ubuntu24/
+dpkg-deb --build --root-owner-group ${RELEASE_FILE}/
+
+#Generate SHASUMS file
+sha256sum checksums >> SHASUMS
+sha256sum ${RELEASE_FILE}.deb >> SHASUMS
+echo "Done"
+
+

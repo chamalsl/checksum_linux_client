@@ -1,0 +1,217 @@
+#include "utils.h"
+#include <iostream>
+#include <curl/curl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <pwd.h>
+#include <gtkmm.h>
+#include <filesystem>
+#include <libsecret/secret.h>
+
+char Utils::getHexChar(unsigned short number)
+{
+    std::string hex_chars = "0123456789ABCDEF";
+    if (number < 0 || number > 15){
+        return '\0';
+    }
+    return hex_chars[number];
+}
+
+std::string Utils::toHex(unsigned char c)
+{
+    std::string hex("");
+    unsigned short num = (unsigned short)c;
+    unsigned short remainder = num % 16;
+    num = num / 16;
+    //std::cout << "Hex" << (unsigned short)c << " :" << remainder << " :" << num << "\n";
+    hex += Utils::getHexChar(num);
+    hex += Utils::getHexChar(remainder);
+    return hex;
+}
+
+std::string Utils::toHex(unsigned char *str, size_t length)
+{
+    std::string hex("");
+    for (size_t i=0; i < length; i++) {
+       hex.append(Utils::toHex(str[i]));
+    }
+    return hex;
+}
+
+static size_t getResponseFromCurl(void* contents, size_t size, size_t nmemb, void* user_data){
+  //std::cout << "Curl write data " << size << " " << nmemb << "\n";
+  std::string* data = (std::string*)user_data;
+  data->append((char*)contents, size * nmemb);
+  return size*nmemb;
+}
+
+std::string Utils::requestURL(std::string p_url)
+{
+  const char* url = p_url.c_str();
+  CURL* curl_conn = curl_easy_init();
+  curl_easy_setopt(curl_conn, CURLOPT_URL, url);
+  curl_easy_setopt(curl_conn, CURLOPT_HTTPGET, 1L);
+  curl_easy_setopt(curl_conn, CURLOPT_WRITEFUNCTION, getResponseFromCurl);
+  std::string data;
+  curl_easy_setopt(curl_conn, CURLOPT_WRITEDATA, (void *)&data);
+  
+  int m_status = 0;
+  CURLcode code = curl_easy_perform(curl_conn);
+  curl_easy_getinfo(curl_conn, CURLINFO_RESPONSE_CODE ,&m_status);
+  //std::cout << "Is online " << m_status << " " << code << "\n";
+  //std::cout << "Response is " << data << "\n";
+  curl_easy_cleanup(curl_conn);
+  return data;
+}
+
+std::pair<short, std::string> Utils::requestURLWithPost(std::string p_url, std::map<std::string, std::string> p_post_data,
+    std::string token, std::map<std::string, std::string> headers)
+{
+  const char* url = p_url.c_str();
+
+  CURL* curl_conn = curl_easy_init();
+  curl_mime *post_data = curl_mime_init(curl_conn);
+  for (auto const& val: p_post_data){
+    curl_mimepart *part = curl_mime_addpart(post_data);
+    curl_mime_name(part, val.first.c_str());
+    curl_mime_data(part, curl_easy_escape(curl_conn, val.second.c_str(), val.second.length()), CURL_ZERO_TERMINATED);
+  }  
+
+  curl_easy_setopt(curl_conn, CURLOPT_URL, url);
+  curl_easy_setopt(curl_conn, CURLOPT_MIMEPOST, post_data);
+  curl_easy_setopt(curl_conn, CURLOPT_WRITEFUNCTION, getResponseFromCurl);
+  std::string data;
+  curl_easy_setopt(curl_conn, CURLOPT_WRITEDATA, (void *)&data);
+  struct curl_slist *list = NULL;
+  if (!token.empty()){
+    std::string auth_header = "Authorization: Bearer ";
+    auth_header.append(token);
+    list = curl_slist_append(list, auth_header.c_str());
+  }
+
+  for (auto const& val: headers){
+    std::string header;
+    header.append(val.first);
+    header.append(":");
+    header.append(val.second);
+    list = curl_slist_append(list, header.c_str());
+  }
+
+  curl_easy_setopt(curl_conn, CURLOPT_HTTPHEADER, list);
+  int m_status = 0;
+  CURLcode code = curl_easy_perform(curl_conn);
+  curl_easy_getinfo(curl_conn, CURLINFO_RESPONSE_CODE ,&m_status);
+  //std::cout << "Is online " << m_status << " " << code << "\n";
+  //std::cout << "Response is " << data << "\n";
+  curl_mime_free(post_data);
+  curl_easy_cleanup(curl_conn);
+  return std::make_pair(m_status, data);
+}
+
+std::string Utils::getHomeDirectory()
+{
+    std::string home_dir_str("");
+    char* home_dir = getenv("HOME");
+    if (home_dir == NULL) {
+        long buf_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+        char* buf;
+        struct passwd pw;
+        struct passwd* result;
+        if (buf_size == -1){
+            buf_size = 20000;
+        }
+        buf = (char*)malloc(buf_size);
+        if (!buf){
+            return std::string();
+        }
+        int rc = getpwuid_r(getuid(), &pw, buf, buf_size, &result);
+        if (result == NULL){
+            return std::string();
+        }
+        
+        home_dir_str.append(pw.pw_dir);
+        free(buf);
+    } else {
+        home_dir_str.append(home_dir);
+    }
+    
+    return home_dir_str;
+}
+
+std::string Utils::getDataDirectory()
+{
+    std::string home_dir = Utils::getHomeDirectory();
+    if (home_dir.empty()){
+        return std::string();
+    }
+
+    std::filesystem::path home_dir_path(home_dir);
+    home_dir_path.append(".local/share/is-online");
+    return home_dir_path.u8string();
+}
+
+const SecretSchema* Utils::getSecretStoreSchema()
+{
+    static const SecretSchema checksum_token_schema = {
+      "org.rammini.checksums.access_token", SECRET_SCHEMA_NONE,
+      {
+        {"Application", SECRET_SCHEMA_ATTRIBUTE_STRING}, 
+        {"NULL", SECRET_SCHEMA_ATTRIBUTE_INTEGER},
+      }
+    };
+    return &checksum_token_schema;
+}
+
+bool Utils::storeAccessToken(const char* access_token)
+{
+    GError *error = NULL;
+    secret_password_store_sync (Utils::getSecretStoreSchema(), SECRET_COLLECTION_DEFAULT,
+                            "File Verifier Access Token", access_token, NULL, &error,
+                            "Application", "File Verifier",
+                            NULL);
+
+    if (error != NULL) {
+       g_error_free (error);
+       return false;
+    } else {
+       return true;
+    }
+}
+
+bool Utils::deleteAccessToken()
+{
+    GError *error = NULL;
+    gboolean removed = secret_password_clear_sync (Utils::getSecretStoreSchema(), NULL, &error,
+                                               "Application", "File Verifier",NULL);
+
+    if (error != NULL) {
+        g_error_free (error);
+    } 
+    return removed;
+}
+
+std::string Utils::getAccessToken()
+{
+    GError *error = NULL;
+    gchar *access_token = secret_password_lookup_sync (Utils::getSecretStoreSchema(), NULL, &error,
+                                               "Application", "File Verifier",NULL);
+    std::string access_token_str;
+
+    if (error != NULL) {
+        g_error_free (error);
+    } 
+    
+    if (access_token != NULL) {
+        access_token_str.append(access_token);
+    } 
+
+    return access_token_str;
+}
+
+void Utils::showError(std::string error_msg)
+{
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget* dialog = gtk_message_dialog_new(NULL, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s",error_msg.c_str());
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+}

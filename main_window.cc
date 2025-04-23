@@ -24,7 +24,7 @@ MainWindow::MainWindow()
 {
 
   set_title("File Verifier");
-  set_default_size(650,600);
+  set_default_size(660,600);
   m_correct = Gdk::Pixbuf::create_from_resource("/images/correct.svg");
   m_wrong = Gdk::Pixbuf::create_from_resource("/images/wrong.svg");
   m_warning = Gdk::Pixbuf::create_from_resource("/images/warning.svg");

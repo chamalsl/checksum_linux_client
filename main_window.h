@@ -2,25 +2,16 @@
 #define MAINWINDOW_H
 
 #include "token_window.h"
+#include "result.h"
 #include "third_party/json_parser/json_parser.h"
 #include <gtkmm.h>
 #include <thread>
 #include <map>
 #include <cstdint>
 #include <string>
+#include <future>
 #include <memory>
 
-static const std::string URL_API_FIND_BY_NAME = "http://127.0.0.1:8000/api/findByFileName";
-static const std::string URL_API_FIND_BY_NAME_AUTH = "http://127.0.0.1:8000/api/findByFileNamePrivate";
-static const std::string URL_API_FIND_BY_SHA = "http://127.0.0.1:8000/api/findBySha256";
-static const std::string URL_API_FIND_BY_SHA_AUTH = "http://127.0.0.1:8000/api/findBySha256Private";
-
-enum RESULT{
-  CORRECT,
-  WRONG,
-  WARNING,
-  EMPTY
-};
 class TokenWindow;
 class MainWindow: public Gtk::Window {
 
@@ -37,6 +28,7 @@ protected:
   Gtk::Button m_browseBtn;
   Gtk::Button m_checkBtn;
   Gtk::Button m_loginBtn;
+  Gtk::Spinner m_spinner;
   Gtk::Image m_resultImage;
   Gtk::TextView m_resultText;
   Gtk::Box m_addForm;
@@ -44,11 +36,10 @@ protected:
   TokenWindow* m_loginWindow;
   
 private:
-  std::string calculateSha256Sum(std::string file_path);
-  //std::unique_ptr<JsonObject> fetchSha256Sum(std::string post_data, std::string url);
-  std::pair<short, std::string> findFileBySha256(std::string sha256);
-  std::pair<short, std::string> findFilesByFileName(std::string file_name);
-  void displayResult(std::string message, RESULT result);
+  void startVerifying();
+  void onResultReceived();
+  void displayResult(std::string message, Result::RESULT_TYPE result);
+  void enableButtons(bool enable);
   std::string jsonFileToString(JsonObject* file_json, std::string local_file_sha256);
   std::string m_file_path;
   std::string m_apiToken;
@@ -56,6 +47,8 @@ private:
   Glib::RefPtr<Gdk::Pixbuf> m_correct;
   Glib::RefPtr<Gdk::Pixbuf> m_wrong;
   Glib::RefPtr<Gdk::Pixbuf> m_warning;
+  Glib::Dispatcher m_Dispatcher;
+  std::future<std::unique_ptr<Result>> m_futureResult;
   
 };
 #endif //MAINWINDOW_H

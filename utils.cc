@@ -5,13 +5,64 @@
 #include <stdlib.h>
 #include <pwd.h>
 #include <gtkmm.h>
+#include <fstream>
+#include <openssl/sha.h>
+#include <openssl/evp.h>
 #include <filesystem>
 #include <libsecret/secret.h>
+
+
+std::string Utils::calculateSha256Sum(std::string file_path_str){
+    std::filesystem::path file_path(file_path_str);
+    if (!std::filesystem::exists(file_path)){
+      return "";
+    }
+  
+    size_t file_size = std::filesystem::file_size(file_path);
+  
+    if (file_size == 0){
+      return "";
+    }
+  
+    unsigned char *sha_256_hash;
+    size_t read_size = 1024;
+    char data[read_size];
+    std::ifstream file_stream(file_path, std::ios_base::binary);
+  
+    EVP_MD_CTX *evp_ctx = EVP_MD_CTX_new();
+    if (evp_ctx == NULL){
+      return "";
+    }
+  
+    if (EVP_DigestInit_ex(evp_ctx, EVP_sha256(), NULL) != 1){
+      return "";
+    }
+  
+    while (!file_stream.eof()) {
+      file_stream.read(data, read_size);
+      if (file_stream.gcount()){
+        if (EVP_DigestUpdate(evp_ctx, data, file_stream.gcount()) != 1){
+          return "";
+        }
+      }
+    }
+  
+    size_t digest_size = EVP_MD_size(EVP_sha256());
+    sha_256_hash = (unsigned char*)OPENSSL_malloc(digest_size);
+    if (!sha_256_hash){
+      return "";
+    }
+  
+    EVP_DigestFinal_ex(evp_ctx, sha_256_hash, NULL);
+    
+    return Utils::toHex(sha_256_hash, digest_size);
+  }
 
 char Utils::getHexChar(unsigned short number)
 {
     std::string hex_chars = "0123456789ABCDEF";
-    if (number < 0 || number > 15){
+    if (number < 0 || number > 15)
+    {
         return '\0';
     }
     return hex_chars[number];
@@ -146,7 +197,7 @@ std::string Utils::getDataDirectory()
     }
 
     std::filesystem::path home_dir_path(home_dir);
-    home_dir_path.append(".local/share/is-online");
+    home_dir_path.append(".local/share/rammini.com/checksums");
     return home_dir_path.u8string();
 }
 

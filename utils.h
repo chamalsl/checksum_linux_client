@@ -5,6 +5,7 @@
 class Utils{
 
   public:
+  static std::string calculateSha256Sum(std::string file_path_str);
   static char getHexChar(unsigned short number);
   static std::string toHex(unsigned char c);
   static std::string toHex(unsigned char* str, size_t length);

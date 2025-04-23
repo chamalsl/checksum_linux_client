@@ -1,5 +1,6 @@
 Build
 ------
+glib-compile-resources --target=resources.cc --generate-source resources.xml
 make
 
 

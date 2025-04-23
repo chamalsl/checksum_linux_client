@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/images">
-    <file>correct.png</file>
-    <file>wrong.png</file>
-    <file>warning.png</file>
+    <file>correct.svg</file>
+    <file>wrong.svg</file>
+    <file>warning.svg</file>
   </gresource>
   <gresource prefix="/data">
     <file>VERSION</file>

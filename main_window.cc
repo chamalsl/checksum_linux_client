@@ -15,9 +15,11 @@
 MainWindow::MainWindow()
 :m_mainContainer(Gtk::Orientation::ORIENTATION_VERTICAL, 5),
  m_addForm(Gtk::Orientation::ORIENTATION_HORIZONTAL, 5),
+ m_lowButtonPanel(Gtk::Orientation::ORIENTATION_HORIZONTAL, 5),
  m_browseBtn("Browse"),
  m_checkBtn("Check"),
  m_loginBtn("Login"),
+ m_showAboutBtn(),
  m_resultImage()
 {
 
@@ -26,6 +28,31 @@ MainWindow::MainWindow()
   m_correct = Gdk::Pixbuf::create_from_resource("/images/correct.svg");
   m_wrong = Gdk::Pixbuf::create_from_resource("/images/wrong.svg");
   m_warning = Gdk::Pixbuf::create_from_resource("/images/warning.svg");
+
+  Glib::RefPtr< const Glib::Bytes > version = Gio::Resource::lookup_data_global("/data/VERSION");
+  if (!version || version->get_size() == 0) {
+    m_version = std::make_unique<std::string>("0.0.0");
+  }
+  else {
+    gsize size = version->get_size();
+    char* tmp = (char*)malloc(size + 1);
+    if (!tmp){
+      std::cout << "Out of memory. Could not read version.\n";
+      exit(1);
+    }
+
+    memcpy(tmp, version->get_data(size), version->get_size());
+    tmp[size] = '\0';
+    m_version = std::make_unique<std::string>(tmp); 
+    free(tmp);
+  }
+
+  m_aboutDialog.set_transient_for(*this);
+  m_aboutDialog.set_logo(Gdk::Pixbuf::create_from_resource("/images/coconut.png"));
+  m_aboutDialog.set_version(*m_version.get());
+  m_aboutDialog.set_program_name("CheckSums");
+  m_aboutDialog.set_copyright("checksums.rammini.com");
+  m_aboutDialog.set_license_type(Gtk::License::LICENSE_MIT_X11);
 
 
 
@@ -45,9 +72,13 @@ MainWindow::MainWindow()
   m_mainContainer.pack_start(m_addForm, false, false, 5);
   m_addForm.set_valign(Gtk::ALIGN_BASELINE);
   m_mainContainer.set_valign(Gtk::ALIGN_FILL);
-  m_mainContainer.pack_end(m_resultText, true, true, 5);
+  m_mainContainer.pack_start(m_resultText, true, true, 5);
+  m_showAboutBtn.set_image_from_icon_name("help-about");
+  m_lowButtonPanel.pack_end(m_showAboutBtn, false, false, 5);
+  m_mainContainer.pack_end(m_lowButtonPanel, false, false, 5);
   add(m_mainContainer);
 
+  m_showAboutBtn.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::showAbout));
   m_browseBtn.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::selectFile));
   m_checkBtn.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::startVerifying));
   m_loginBtn.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::handleLoginAndLogout));
@@ -247,6 +278,11 @@ void MainWindow::enableButtons(bool enable)
   m_checkBtn.set_sensitive(enable);
   m_browseBtn.set_sensitive(enable);
   m_loginBtn.set_sensitive(enable);
+}
+
+void MainWindow::showAbout()
+{
+  m_aboutDialog.present();
 }
 
 std::string MainWindow::jsonFileToString(JsonObject *file_json, std::string local_file_sha256)

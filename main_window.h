@@ -32,6 +32,9 @@ protected:
   Gtk::Image m_resultImage;
   Gtk::TextView m_resultText;
   Gtk::Box m_addForm;
+  Gtk::Box m_lowButtonPanel;
+  Gtk::AboutDialog m_aboutDialog;
+  Gtk::Button m_showAboutBtn;
   Gtk::VBox m_mainContainer;
   TokenWindow* m_loginWindow;
   
@@ -40,6 +43,7 @@ private:
   void onResultReceived();
   void displayResult(std::string message, Result::RESULT_TYPE result);
   void enableButtons(bool enable);
+  void showAbout();
   std::string jsonFileToString(JsonObject* file_json, std::string local_file_sha256);
   std::string m_file_path;
   std::string m_apiToken;
@@ -48,6 +52,7 @@ private:
   Glib::RefPtr<Gdk::Pixbuf> m_wrong;
   Glib::RefPtr<Gdk::Pixbuf> m_warning;
   Glib::Dispatcher m_Dispatcher;
+  std::unique_ptr<std::string> m_version;
   std::future<std::unique_ptr<Result>> m_futureResult;
   
 };

@@ -1,4 +1,5 @@
 #include <string>
+#include <memory>
 #include <map>
 #include <libsecret/secret.h>
 
@@ -15,6 +16,7 @@ class Utils{
 
   static std::string getHomeDirectory();
   static std::string getDataDirectory();
+  static std::unique_ptr<std::string> getVersion();
   static bool storeAccessToken(const char* access_token);
   static bool deleteAccessToken();
   static std::string getAccessToken();

@@ -201,6 +201,28 @@ std::string Utils::getDataDirectory()
     return home_dir_path.u8string();
 }
 
+std::unique_ptr<std::string> Utils::getVersion()
+{
+  Glib::RefPtr< const Glib::Bytes > version = Gio::Resource::lookup_data_global("/data/VERSION");
+  if (!version || version->get_size() == 0) {
+    return std::make_unique<std::string>("0.0.0");
+  }
+  else {
+    gsize size = version->get_size();
+    char* tmp = (char*)malloc(size + 1);
+    if (!tmp){
+      std::cout << "Out of memory. Could not read version.\n";
+      exit(1);
+    }
+
+    memcpy(tmp, version->get_data(size), version->get_size());
+    tmp[size] = '\0';
+    std::unique_ptr<std::string> version = std::make_unique<std::string>(tmp); 
+    free(tmp);
+    return version;
+  }
+}
+
 const SecretSchema* Utils::getSecretStoreSchema()
 {
     static const SecretSchema checksum_token_schema = {

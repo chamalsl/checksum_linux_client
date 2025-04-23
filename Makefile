@@ -33,7 +33,7 @@ ${BUILD_DIR}%.o: %.cc
 	$(CC) -c -o $@ $< $(CXXFLAGS)
 
 ${BUILD_DIR}checksums: $(OBJ)
-	$(CC) -o ${BUILD_DIR}checksums shasums.cc $^ `pkg-config --cflags --libs gtkmm-3.0 libcurl libcrypto libsecret-1`
+	$(CC) ${LDFLAGS} -o ${BUILD_DIR}checksums shasums.cc $^ `pkg-config --cflags --libs gtkmm-3.0 libcurl libcrypto libsecret-1`
 
 clean:
 	echo "Removing build files"

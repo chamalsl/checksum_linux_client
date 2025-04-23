@@ -19,7 +19,7 @@ LDFLAGS := ${ldflags.${BUILD}} ${ldflags.common}
 VPATH=$(BUILD_DIR)third_party/json_parser/
 CC=g++
 
-_OBJ := token_window.o main_window.o utils.o resources.o third_party/json_parser/json_parser.o
+_OBJ := token_window.o main_window.o utils.o resources.o api.o third_party/json_parser/json_parser.o
 _TEST_OBJ := utils_unittest.o
 OBJ := ${patsubst %,${BUILD_DIR}%,${_OBJ}}
 TEST_OBJ := ${patsubst %,${BUILD_DIR}%,${_TEST_OBJ}}

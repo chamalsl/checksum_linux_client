@@ -65,6 +65,7 @@ MainWindow::MainWindow()
   }
 
   m_resultText.set_left_margin(15);
+  m_resultText.set_editable(false);
   show_all_children();
   m_Dispatcher.connect(sigc::mem_fun(*this, &MainWindow::onResultReceived));
 }
@@ -199,6 +200,10 @@ void MainWindow::onResultReceived()
 }
 
 void MainWindow::startVerifying(){
+  if (m_file_path.empty()){
+    Utils::showError("Please click Browse button to select a file.");
+    return;
+  }
   enableButtons(false);
   m_spinner.start();
   m_futureResult = std::async(std::launch::async,verifyFile, &m_Dispatcher, m_file_path, m_apiToken);

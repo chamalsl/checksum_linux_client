@@ -23,7 +23,6 @@ MainWindow::MainWindow()
 
   set_title("File Verifier");
   set_default_size(650,600);
-  //set_border_width(10);
   m_correct = Gdk::Pixbuf::create_from_resource("/images/correct.svg");
   m_wrong = Gdk::Pixbuf::create_from_resource("/images/wrong.svg");
   m_warning = Gdk::Pixbuf::create_from_resource("/images/warning.svg");
@@ -31,7 +30,6 @@ MainWindow::MainWindow()
 
 
   m_mainContainer.set_homogeneous(false);
-  //m_fileNameText.set_valign(Gtk::ALIGN_START);
   m_fileNameText.set_width_chars(40);
   m_addForm.pack_start(m_fileNameText, false, false, 5);
   //m_browseBtn.set_sensitive(false);
@@ -65,6 +63,8 @@ MainWindow::MainWindow()
   if (!m_apiToken.empty()){
     m_loginBtn.set_label("Logout");
   }
+
+  m_resultText.set_left_margin(15);
   show_all_children();
   m_Dispatcher.connect(sigc::mem_fun(*this, &MainWindow::onResultReceived));
 }

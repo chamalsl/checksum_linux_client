@@ -1,6 +1,6 @@
 VERSION=$(<VERSION)
 echo "Creating release for version - ${VERSION}"
-RELEASE_FILE=checksums_${VERSION}_amd64
+RELEASE_FILE=checksums_v${VERSION}_amd64
 RELEASE_DIR=release/Ubuntu24/${RELEASE_FILE}
 mkdir -p ${RELEASE_DIR}/usr/local/bin
 mkdir -p ${RELEASE_DIR}/DEBIAN

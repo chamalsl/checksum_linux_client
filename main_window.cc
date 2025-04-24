@@ -36,6 +36,14 @@ MainWindow::MainWindow()
   m_aboutDialog.set_program_name("CheckSums");
   m_aboutDialog.set_copyright("checksums.rammini.com");
   m_aboutDialog.set_license_type(Gtk::License::LICENSE_MIT_X11);
+  std::vector<Glib::ustring> list_authors;
+  list_authors.push_back("Chamal De Silva");
+  list_authors.push_back("Thanks to these open source software-");
+  list_authors.push_back("libgtkmm");
+  list_authors.push_back("openssl");
+  list_authors.push_back("libcurl");
+  list_authors.push_back("libsecret");
+  m_aboutDialog.set_authors(list_authors);
 
 
 

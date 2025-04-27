@@ -305,7 +305,7 @@ void MainWindow::onResultReceived()
       }
 
       displayResult(result->m_message, result->m_resultType);
-      m_progressBar.set_fraction(100);
+      m_progressBar.set_fraction((float)m_taskStatus.percentage/100);
     }else{
       m_progressBar.set_fraction((float)m_taskStatus.percentage/100);
     }
@@ -318,6 +318,8 @@ void MainWindow::startVerifying(){
     return;
   }
 
+  m_progressBar.set_no_show_all(false);
+  m_progressBar.set_visible(true);
   m_taskStatus.error = false;
   m_taskStatus.percentage = 0;
   m_progressBar.set_fraction(0);
@@ -363,8 +365,6 @@ void MainWindow::enableButtons(bool enable)
   m_checkBtn.set_sensitive(enable);
   m_browseBtn.set_sensitive(enable);
   m_loginBtn.set_sensitive(enable);
-  m_progressBar.set_no_show_all(enable);
-  m_progressBar.set_visible(!enable);
 }
 
 void MainWindow::showAbout()

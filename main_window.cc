@@ -54,10 +54,6 @@ MainWindow::MainWindow()
   //m_checkBtn.set_sensitive(false);
   m_addForm.add(m_browseBtn);
   m_addForm.add(m_checkBtn);
-  // Create a spinner to indicate waiting
-  m_spinner.set_halign(Gtk::ALIGN_CENTER);
-  m_spinner.set_valign(Gtk::ALIGN_CENTER);
-  m_addForm.add(m_spinner);
   m_addForm.add(m_resultImage);
   m_addForm.add(m_loginBtn);
   m_mainContainer.pack_start(m_addForm, false, false, 5);
@@ -65,9 +61,15 @@ MainWindow::MainWindow()
   m_mainContainer.set_valign(Gtk::ALIGN_FILL);
   m_mainContainer.pack_start(m_resultText, true, true, 5);
   m_showAboutBtn.set_image_from_icon_name("help-about");
+  m_progressBar.set_show_text(true);
+  m_progressBar.set_halign(Gtk::Align::ALIGN_CENTER);
+  m_progressBar.set_valign(Gtk::Align::ALIGN_CENTER);
+  m_lowButtonPanel.pack_start(m_progressBar, false, false, 5);
   m_lowButtonPanel.pack_end(m_showAboutBtn, false, false, 5);
   m_mainContainer.pack_end(m_lowButtonPanel, false, false, 5);
   add(m_mainContainer);
+  m_progressBar.set_no_show_all(true);
+  m_progressBar.set_visible(false);
 
   m_showAboutBtn.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::showAbout));
   m_browseBtn.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::selectFile));
@@ -119,9 +121,96 @@ void MainWindow::selectFile(){
 
 }
 
-std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string file_path, std::string apiToken){
+std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string file_path_str, 
+  std::string apiToken, TaskStatus* task_status){
+    
+  #define COMPLETED \
+    task_status->percentage = 100; \
+    p_dispatcher->emit(); \
+    return result; \
+
+  #define ERROR \
+    task_status->error = true; \
+    p_dispatcher->emit(); \
+    return result; \
+
   std::unique_ptr<Result> result = std::make_unique<Result>();
-  std::string local_sha256 = Utils::calculateSha256Sum(file_path);
+  std::filesystem::path file_path(file_path_str);
+  if (!std::filesystem::exists(file_path)){
+    result->m_resultType = Result::RESULT_TYPE::WRONG;
+    result->m_message = "File does not exist!";
+    ERROR;
+  }
+
+  size_t file_size = std::filesystem::file_size(file_path);
+
+  if (file_size == 0){
+    result->m_resultType = Result::RESULT_TYPE::WRONG;
+    result->m_message = "File is empty!";
+    ERROR
+  }
+
+  unsigned char *sha_256_hash;
+  size_t read_count = 0;
+  size_t read_size = 1048576;
+  size_t hundred_mb = 104857600;
+  if (file_size > hundred_mb){
+    read_size = hundred_mb;
+  }
+  char* data = (char*)malloc(read_size);
+
+  if (!data){
+    result->m_resultType = Result::RESULT_TYPE::WRONG;
+    result->m_message = "Could not allocate memory.!";
+    ERROR;
+  }
+  std::ifstream file_stream(file_path, std::ios_base::binary);
+
+  EVP_MD_CTX *evp_ctx = EVP_MD_CTX_new();
+  if (evp_ctx == NULL){
+    result->m_resultType = Result::RESULT_TYPE::WRONG;
+    result->m_message = "Error occurred while calculating sha 256.!";
+    p_dispatcher->emit();
+    return result;
+  }
+
+  if (EVP_DigestInit_ex(evp_ctx, EVP_sha256(), NULL) != 1){
+    result->m_resultType = Result::RESULT_TYPE::WRONG;
+    result->m_message = "Error occurred while calculating sha 256.!";
+    ERROR;
+  }
+  
+  while (!file_stream.eof()) {
+    file_stream.read(data, read_size);
+    if (file_stream.gcount()){
+      if (EVP_DigestUpdate(evp_ctx, data, file_stream.gcount()) != 1){
+        result->m_resultType = Result::RESULT_TYPE::WRONG;
+        result->m_message = "Error occurred while calculating sha 256.!";
+        ERROR;
+      }else {
+        read_count = read_count + file_stream.gcount();
+        task_status->percentage = (((double)read_count/file_size) * 90);
+        p_dispatcher->emit();
+      }
+    }
+  }
+
+  file_stream.close();
+
+  size_t digest_size = EVP_MD_size(EVP_sha256());
+  sha_256_hash = (unsigned char*)OPENSSL_malloc(digest_size);
+  if (!sha_256_hash){
+    result->m_resultType = Result::RESULT_TYPE::WRONG;
+    result->m_message = "Could not allocate memory.!";
+    ERROR;
+  }
+
+  EVP_DigestFinal_ex(evp_ctx, sha_256_hash, NULL);
+  
+  std::string local_sha256 = Utils::toHex(sha_256_hash, digest_size);
+  task_status->percentage = 95;
+  p_dispatcher->emit();
+
   std::transform(local_sha256.begin(), local_sha256.end(), local_sha256.begin(), static_cast<int(*)(int)>(std::tolower));
   std::string file_name = std::filesystem::path(file_path).filename();
   std::pair<short, std::string> response = Api::findBySha256(local_sha256, apiToken);
@@ -130,15 +219,13 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
   
   if (result->m_httpStatus == 401){
     result->m_resultType = Result::RESULT_TYPE::WRONG;
-    p_dispatcher->emit();
-    return result;
+    COMPLETED;
   }
 
   if (result->m_httpStatus != 200 || result->m_message.empty()){
     result->m_message = "Network or system error!";
     result->m_resultType = Result::RESULT_TYPE::WRONG;
-    p_dispatcher->emit();
-    return result;
+    COMPLETED;
   }
 
   JsonParser json_parser;
@@ -147,9 +234,12 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
   if (json_obj->type == JsonType::OBJECT && json_obj->arrayItems.size() > 1){
     result->m_message = Api::getResultToDisplay(json_obj.get(), local_sha256);
     result->m_resultType = Result::RESULT_TYPE::CORRECT;
-    p_dispatcher->emit();
-    return result;
+    COMPLETED;
   }
+
+  task_status->percentage = 98;
+  p_dispatcher->emit();
+
 
   response = Api::findByFileName(file_name, apiToken);
   result->m_httpStatus = response.first;
@@ -157,15 +247,13 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
 
   if (result->m_httpStatus == 401){
     result->m_resultType = Result::RESULT_TYPE::WRONG;
-    p_dispatcher->emit();
-    return result;
+    COMPLETED;
   }
 
   if (result->m_httpStatus != 200 || result->m_message.empty()){
     result->m_message = "Network or system error!";
     result->m_resultType = Result::RESULT_TYPE::WRONG;
-    p_dispatcher->emit();
-    return result;
+    COMPLETED;
   }
 
   json_obj = json_parser.parseJson(result->m_message);
@@ -177,8 +265,7 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
     result_message.append(local_sha256);
     result->m_resultType = Result::RESULT_TYPE::WARNING;
     result->m_message = result_message;
-    p_dispatcher->emit();
-    return result;
+    COMPLETED;
   }
   else if (json_obj->arrayItems.size() > 1){
     result_message.append("Our database has multiple files with same name.");
@@ -187,38 +274,42 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
     result_message.append(local_sha256);
     result->m_resultType = Result::RESULT_TYPE::WARNING;
     result->m_message = result_message;
-    p_dispatcher->emit();
-    return result;
+    COMPLETED;
   }
   else if (json_obj->arrayItems.size() == 1){
     JsonObject* file_json = json_obj->arrayItems.at(0).get();
     result->m_message = Api::getResultToDisplay(file_json, local_sha256);
     result->m_resultType = Result::RESULT_TYPE::WRONG;
-    p_dispatcher->emit();
-    return result;
+    COMPLETED;
   }
 
   result->m_message = "Unknown Error!";
   result->m_resultType = Result::RESULT_TYPE::WRONG;
-  p_dispatcher->emit();
-  return result;
+  COMPLETED;
 }
 
 void MainWindow::onResultReceived()
 {
-  std::unique_ptr<Result> result = m_futureResult.get();
-  m_spinner.stop();
-  enableButtons(true);
-  if (result->m_httpStatus == 401){
-    Utils::showError("Your access token is invalid or expired.\n"
-                     "Please click Check button again to verify a public file.\n"
-                     "Please request and enter a new token to verify a personal file.\n"
-                     );
-    handleLoginAndLogout();
-    return;
-  }
+  if (m_futureResult.valid()){
+    if (m_taskStatus.percentage == 100 || m_taskStatus.error == true) {
+      m_futureResult.wait();
+      std::unique_ptr<Result> result = m_futureResult.get();
+      enableButtons(true);
+      if (result->m_httpStatus == 401){
+        Utils::showError("Your access token is invalid or expired.\n"
+                        "Please click Check button again to verify a public file.\n"
+                        "Please request and enter a new token to verify a personal file.\n"
+                        );
+        handleLoginAndLogout();
+        return;
+      }
 
-  displayResult(result->m_message, result->m_resultType);
+      displayResult(result->m_message, result->m_resultType);
+      m_progressBar.set_fraction(100);
+    }else{
+      m_progressBar.set_fraction((float)m_taskStatus.percentage/100);
+    }
+  }
 }
 
 void MainWindow::startVerifying(){
@@ -226,9 +317,12 @@ void MainWindow::startVerifying(){
     Utils::showError("Please click Browse button to select a file.");
     return;
   }
+
+  m_taskStatus.error = false;
+  m_taskStatus.percentage = 0;
+  m_progressBar.set_fraction(0);
   enableButtons(false);
-  m_spinner.start();
-  m_futureResult = std::async(std::launch::async,verifyFile, &m_Dispatcher, m_file_path, m_apiToken);
+  m_futureResult = std::async(std::launch::async,verifyFile, &m_Dispatcher, m_file_path, m_apiToken, &m_taskStatus);
 }
 
 void MainWindow::handleLoginAndLogout()
@@ -269,6 +363,8 @@ void MainWindow::enableButtons(bool enable)
   m_checkBtn.set_sensitive(enable);
   m_browseBtn.set_sensitive(enable);
   m_loginBtn.set_sensitive(enable);
+  m_progressBar.set_no_show_all(enable);
+  m_progressBar.set_visible(!enable);
 }
 
 void MainWindow::showAbout()

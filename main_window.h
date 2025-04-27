@@ -3,6 +3,7 @@
 
 #include "token_window.h"
 #include "result.h"
+#include "task_status.h"
 #include "third_party/json_parser/json_parser.h"
 #include <gtkmm.h>
 #include <thread>
@@ -22,16 +23,15 @@ public:
 
 protected:
   void selectFile();
-  void checkSha256Sum();
   void handleLoginAndLogout();
   Gtk::Entry m_fileNameText;
   Gtk::Button m_browseBtn;
   Gtk::Button m_checkBtn;
   Gtk::Button m_loginBtn;
-  Gtk::Spinner m_spinner;
   Gtk::Image m_resultImage;
   Gtk::TextView m_resultText;
   Gtk::Box m_addForm;
+  Gtk::ProgressBar m_progressBar;
   Gtk::Box m_lowButtonPanel;
   Gtk::AboutDialog m_aboutDialog;
   Gtk::Button m_showAboutBtn;
@@ -47,6 +47,7 @@ private:
   std::string jsonFileToString(JsonObject* file_json, std::string local_file_sha256);
   std::string m_file_path;
   std::string m_apiToken;
+  TaskStatus m_taskStatus;
 
   Glib::RefPtr<Gdk::Pixbuf> m_correct;
   Glib::RefPtr<Gdk::Pixbuf> m_wrong;

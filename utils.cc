@@ -103,6 +103,7 @@ std::string Utils::requestURL(std::string p_url)
   curl_easy_setopt(curl_conn, CURLOPT_URL, url);
   curl_easy_setopt(curl_conn, CURLOPT_HTTPGET, 1L);
   curl_easy_setopt(curl_conn, CURLOPT_WRITEFUNCTION, getResponseFromCurl);
+  curl_easy_setopt(curl_conn, CURLOPT_TIMEOUT, 10L);
   std::string data;
   curl_easy_setopt(curl_conn, CURLOPT_WRITEDATA, (void *)&data);
   
@@ -130,6 +131,7 @@ std::pair<short, std::string> Utils::requestURLWithPost(std::string p_url, std::
 
   curl_easy_setopt(curl_conn, CURLOPT_URL, url);
   curl_easy_setopt(curl_conn, CURLOPT_MIMEPOST, post_data);
+  curl_easy_setopt(curl_conn, CURLOPT_TIMEOUT, 10L);
   curl_easy_setopt(curl_conn, CURLOPT_WRITEFUNCTION, getResponseFromCurl);
   std::string data;
   curl_easy_setopt(curl_conn, CURLOPT_WRITEDATA, (void *)&data);

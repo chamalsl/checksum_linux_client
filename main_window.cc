@@ -392,10 +392,10 @@ std::string MainWindow::jsonFileToString(JsonObject *file_json, std::string loca
   //std::transform(local_file_sha256.begin(), local_file_sha256.end(), local_file_sha256.begin(), static_cast<int(*)(int)>(std::tolower));
   std::transform(remote_sha256sum.begin(), remote_sha256sum.end(), remote_sha256sum.begin(), static_cast<int(*)(int)>(std::tolower));
   if (local_file_sha256 == remote_sha256sum){
-    result.append("Sha256Sums matched !\n\n");
+    result.append("Sha256 matched !\n\n");
     matched = true;
   }else {
-    result.append("Sha256Sums did NOT match!\n\n");
+    result.append("Sha256 did NOT match!\n\n");
     matched = false;
   }
   result.append("File name: ");

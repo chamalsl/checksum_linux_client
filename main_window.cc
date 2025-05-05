@@ -22,8 +22,8 @@ MainWindow::MainWindow()
  m_showAboutBtn(),
  m_resultImage()
 {
-  set_position(Gtk::WIN_POS_CENTER_ALWAYS);
-  set_title("File Verifier");
+  set_position(Gtk::WIN_POS_CENTER);
+  set_title("Checksums");
   set_default_size(660,400);
 
   auto css_provider = Gtk::CssProvider::create();

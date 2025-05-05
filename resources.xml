@@ -9,4 +9,7 @@
   <gresource prefix="/data">
     <file>VERSION</file>
   </gresource>
+    <gresource prefix="/css">
+    <file>shasums.css</file>
+  </gresource>
 </gresources>

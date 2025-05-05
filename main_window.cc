@@ -22,9 +22,15 @@ MainWindow::MainWindow()
  m_showAboutBtn(),
  m_resultImage()
 {
-
+  set_position(Gtk::WIN_POS_CENTER_ALWAYS);
   set_title("File Verifier");
-  set_default_size(660,600);
+  set_default_size(660,400);
+
+  auto css_provider = Gtk::CssProvider::create();
+  css_provider->load_from_resource("/css/shasums.css");
+  Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  m_resultText.set_name("result_text");
+
   m_correct = Gdk::Pixbuf::create_from_resource("/images/correct.svg");
   m_wrong = Gdk::Pixbuf::create_from_resource("/images/wrong.svg");
   m_warning = Gdk::Pixbuf::create_from_resource("/images/warning.svg");
@@ -79,7 +85,6 @@ MainWindow::MainWindow()
   m_loginWindow->setParentWindow(this);
   m_loginWindow->set_default_size(100,200);
   m_loginWindow->set_modal(true);
-  set_position(Gtk::WIN_POS_CENTER);
   m_loginWindow->set_transient_for(*this);
   m_loginWindow->set_position(Gtk::WIN_POS_CENTER_ON_PARENT);
 
@@ -88,6 +93,7 @@ MainWindow::MainWindow()
     m_loginBtn.set_label("Logout");
   }
 
+  
   m_resultText.set_left_margin(15);
   m_resultText.set_editable(false);
   show_all_children();

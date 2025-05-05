@@ -3,10 +3,17 @@ echo "Creating release for version - ${VERSION}"
 RELEASE_FILE=checksums_v${VERSION}_amd64
 RELEASE_DIR=release/Ubuntu24/${RELEASE_FILE}
 mkdir -p ${RELEASE_DIR}/usr/local/bin
+mkdir -p ${RELEASE_DIR}/usr/share/applications/
+mkdir -p ${RELEASE_DIR}/usr/share/pixmaps/
 mkdir -p ${RELEASE_DIR}/DEBIAN
 touch ${RELEASE_DIR}/DEBIAN/control
+
 cp build/release/checksums release/Ubuntu24/
 cp build/release/checksums ${RELEASE_DIR}/usr/local/bin/checksums
+cp com.rammini.checksums.desktop ${RELEASE_DIR}/usr/share/applications/
+cp com.rammini.checksums.svg ${RELEASE_DIR}/usr/share/pixmaps/
+
+sed -i "s/{VERSION}/${VERSION}/" ${RELEASE_DIR}/usr/share/applications/com.rammini.checksums.desktop
 
 echo "Package: checksums" > ${RELEASE_DIR}/DEBIAN/control
 echo "Version: ${VERSION}" >> ${RELEASE_DIR}/DEBIAN/control
@@ -21,5 +28,3 @@ dpkg-deb --build --root-owner-group ${RELEASE_FILE}/
 sha256sum checksums >> SHASUMS
 sha256sum ${RELEASE_FILE}.deb >> SHASUMS
 echo "Done"
-
-

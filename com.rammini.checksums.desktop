@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version={VERSION}
+Type=Application
+Name=Checksums
+Comment=Application to verify file integrity with online service https://checksums.rammini.com.
+TryExec=checksums
+Exec=checksums
+Categories=Utility
+Icon=com.rammini.checksums.svg
+StartupWMClass=checksums

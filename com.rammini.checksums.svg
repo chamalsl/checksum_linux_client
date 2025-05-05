@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="48"
+   height="48"
+   viewBox="0 0 48 48"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="com.rammini.checksums.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="5.6568543"
+     inkscape:cx="46.227106"
+     inkscape:cy="23.864854"
+     inkscape:window-width="1366"
+     inkscape:window-height="699"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#fafafa;fill-rule:evenodd;fill-opacity:1;stroke:#1249f6;stroke-opacity:1;stroke-width:1.75748031;stroke-dasharray:none"
+       id="rect482"
+       width="45.458771"
+       height="45.100086"
+       x="1.4629576"
+       y="1.4600788"
+       ry="2.4174728" />
+    <ellipse
+       style="fill:#e6e6e6;fill-rule:evenodd;stroke-width:3.01728"
+       id="path1143"
+       cx="23.387745"
+       cy="23.721964"
+       rx="19.420317"
+       ry="18.729713" />
+    <text
+       xml:space="preserve"
+       style="font-size:13.3333px;line-height:1.25;font-family:sans-serif;letter-spacing:0.02px"
+       x="6.6348372"
+       y="29.476206"
+       id="text1307"><tspan
+         sodipodi:role="line"
+         id="tspan1305"
+         x="6.6348372"
+         y="29.476206"
+         dx="0.02"
+         style="fill:#808080">Sums</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:5.33333px;line-height:1.25;font-family:sans-serif"
+       x="16.613003"
+       y="17.874453"
+       id="text1361"><tspan
+         sodipodi:role="line"
+         id="tspan1359"
+         x="16.613003"
+         y="17.874453"
+         style="font-size:5.33333px;fill:#4d4d4d">check</tspan></text>
+  </g>
+</svg>

@@ -228,7 +228,7 @@ std::unique_ptr<std::string> Utils::getVersion()
 const SecretSchema* Utils::getSecretStoreSchema()
 {
     static const SecretSchema checksum_token_schema = {
-      "org.rammini.checksums.access_token", SECRET_SCHEMA_NONE,
+      "com.rammini.checksums.access_token", SECRET_SCHEMA_NONE,
       {
         {"Application", SECRET_SCHEMA_ATTRIBUTE_STRING}, 
         {"NULL", SECRET_SCHEMA_ATTRIBUTE_INTEGER},

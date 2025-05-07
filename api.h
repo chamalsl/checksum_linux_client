@@ -4,6 +4,7 @@
 #include <string>
 #include "third_party/json_parser/json_parser.h"
 
+static const std::string URL_API_GET_TOKEN = "https://checksums.rammini.com/tokens/gettoken";
 static const std::string URL_API_FIND_BY_NAME = "https://checksums.rammini.com/api/findByFileName";
 static const std::string URL_API_FIND_BY_NAME_AUTH = "https://checksums.rammini.com/api/findByFileNamePrivate";
 static const std::string URL_API_FIND_BY_SHA = "https://checksums.rammini.com/api/findBySha256";

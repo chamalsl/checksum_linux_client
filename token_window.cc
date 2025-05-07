@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "third_party/json_parser/json_parser.h"
 #include <iostream>
+#include "api.h"
 
 
 TokenWindow::TokenWindow() : m_tokenLabel("Token"),
@@ -13,7 +14,7 @@ TokenWindow::TokenWindow() : m_tokenLabel("Token"),
   set_title("Login");
   
 
-  m_getTokenBtn.set_uri("http://localhost:8000/tokens/gettoken");
+  m_getTokenBtn.set_uri(URL_API_GET_TOKEN);
   m_getTokenBtn.set_label("Get Token");
   m_formGrid.set_row_spacing(3);
   m_formGrid.set_column_spacing(3);

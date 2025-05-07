@@ -22,6 +22,9 @@ TokenWindow::TokenWindow() : m_tokenLabel("Token"),
   m_buttonBox.add(m_saveTokenBtn);
   m_buttonBox.add(m_getTokenBtn);
   m_buttonBox.add(m_cancelBtn);
+  m_formGrid.set_margin_top(4);
+  m_formGrid.set_margin_left(3);
+  m_formGrid.set_margin_right(3);
   m_formGrid.attach(m_buttonBox, 0,2,3,1);
   add(m_formGrid);
 

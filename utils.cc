@@ -241,8 +241,8 @@ bool Utils::storeAccessToken(const char* access_token)
 {
     GError *error = NULL;
     secret_password_store_sync (Utils::getSecretStoreSchema(), SECRET_COLLECTION_DEFAULT,
-                            "File Verifier Access Token", access_token, NULL, &error,
-                            "Application", "File Verifier",
+                            "com.rammini.checksums Access Token", access_token, NULL, &error,
+                            "Application", "Checksums",
                             NULL);
 
     if (error != NULL) {

@@ -230,7 +230,8 @@ const SecretSchema* Utils::getSecretStoreSchema()
     static const SecretSchema checksum_token_schema = {
       "com.rammini.checksums.access_token", SECRET_SCHEMA_NONE,
       {
-        {"Application", SECRET_SCHEMA_ATTRIBUTE_STRING}, 
+        {SECRET_STORE_SCHEMA_APPLICATION.c_str(), SECRET_SCHEMA_ATTRIBUTE_STRING}, 
+        {SECRET_STORE_SCHEMA_URL.c_str(), SECRET_SCHEMA_ATTRIBUTE_STRING}, 
         {"NULL", SECRET_SCHEMA_ATTRIBUTE_INTEGER},
       }
     };
@@ -241,9 +242,10 @@ bool Utils::storeAccessToken(const char* access_token)
 {
     GError *error = NULL;
     secret_password_store_sync (Utils::getSecretStoreSchema(), SECRET_COLLECTION_DEFAULT,
-                            "com.rammini.checksums Access Token", access_token, NULL, &error,
-                            "Application", "Checksums",
-                            NULL);
+                              "com.rammini.checksums Access Token", access_token, NULL, &error,
+                              SECRET_STORE_SCHEMA_APPLICATION.c_str(), SECRET_STORE_APP_NAME.c_str(),
+                              SECRET_STORE_SCHEMA_URL.c_str(), SECRET_STORE_APP_URL.c_str(),
+                              NULL);
 
     if (error != NULL) {
        g_error_free (error);
@@ -257,7 +259,8 @@ bool Utils::deleteAccessToken()
 {
     GError *error = NULL;
     gboolean removed = secret_password_clear_sync (Utils::getSecretStoreSchema(), NULL, &error,
-                                               "Application", "File Verifier",NULL);
+                                              SECRET_STORE_SCHEMA_APPLICATION.c_str(), SECRET_STORE_APP_NAME.c_str(),
+                                              SECRET_STORE_SCHEMA_URL.c_str(), SECRET_STORE_APP_URL.c_str(),NULL);
 
     if (error != NULL) {
         g_error_free (error);
@@ -269,7 +272,8 @@ std::string Utils::getAccessToken()
 {
     GError *error = NULL;
     gchar *access_token = secret_password_lookup_sync (Utils::getSecretStoreSchema(), NULL, &error,
-                                               "Application", "File Verifier",NULL);
+                                                SECRET_STORE_SCHEMA_APPLICATION.c_str(), SECRET_STORE_APP_NAME.c_str(),
+                                                SECRET_STORE_SCHEMA_URL.c_str(), SECRET_STORE_APP_URL.c_str(),NULL);
     std::string access_token_str;
 
     if (error != NULL) {

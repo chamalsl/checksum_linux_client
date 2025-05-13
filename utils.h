@@ -3,6 +3,12 @@
 #include <map>
 #include <libsecret/secret.h>
 
+static const std::string SECRET_STORE_SCHEMA_APPLICATION = "Application";
+static const std::string SECRET_STORE_SCHEMA_URL = "URL";
+static const std::string SECRET_STORE_TOKEN_NAME = "com.rammini.checksums Access Token";
+static const std::string SECRET_STORE_APP_NAME = "Checksums";
+static const std::string SECRET_STORE_APP_URL = "https://checksums.rammini.com/";
+
 class Utils{
 
   public:

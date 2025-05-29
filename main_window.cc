@@ -237,6 +237,7 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
   OPENSSL_free(sha_512_hash);
   EVP_MD_CTX_free(evp_ctx_256);
   EVP_MD_CTX_free(evp_ctx_512);
+  free(data);
 
   task_status->percentage = 95;
   p_dispatcher->emit();

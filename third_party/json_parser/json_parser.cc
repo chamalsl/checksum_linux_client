@@ -49,13 +49,37 @@ std::unique_ptr<JsonObject> JsonParser::parseJson(std::string json){
             error.append(".");
             return nullptr;
           }
-          current_jsonobj = current_jsonobj->parent;
+          if (current_jsonobj->parent){
+            current_jsonobj = current_jsonobj->parent;
+          }
+          
         }
         else if (c == '}'){
           current_jsonobj = current_jsonobj->parent;
         }
         else if (c == ']'){
           current_jsonobj = current_jsonobj->parent;
+        }
+        else if (c == 'n' && current_jsonobj->type == NULL_VALUE && !current_jsonobj->propertyName.empty()){
+          if ( i == json.length() -1) {
+            return nullptr;
+          }
+          std::string null_string = "null";
+          size_t null_start = json.find_first_of(null_string, i + 1);
+
+          if (null_start == std::string::npos) {
+            return nullptr;
+          }
+
+          if (null_start != i + 1){
+            return nullptr;
+          }
+
+          current_jsonobj->type = NULL_VALUE;
+          current_jsonobj->stringValue = "";
+          current_jsonobj->integerValue = 0;
+          i = i + 3;
+
         }
         else if (c == '"' && current_jsonobj->type == STRING && !current_jsonobj->propertyName.empty()){
           if ( i == json.length() -1) {
@@ -92,6 +116,30 @@ std::unique_ptr<JsonObject> JsonParser::parseJson(std::string json){
           tmp_jsonobj->parent = current_jsonobj;
           current_jsonobj->arrayItems.push_back(std::unique_ptr<JsonObject>(tmp_jsonobj));
           current_jsonobj = tmp_jsonobj;
+        }
+        else if (c == 'n'){
+          if ( i == json.length() -1) {
+            return nullptr;
+          }
+          std::string null_string = "null";
+          size_t null_start = json.find_first_of(null_string, i + 1);
+
+          if (null_start == std::string::npos) {
+            return nullptr;
+          }
+
+          if (null_start != i + 1){
+            return nullptr;
+          }
+          i = i + 3;
+
+          JsonObject* tmp_jsonobj = new JsonObject(NULL_ONLY);
+          tmp_jsonobj->integerValue = 0;
+          tmp_jsonobj->stringValue = "";
+          tmp_jsonobj->parent = current_jsonobj;
+          current_jsonobj->arrayItems.push_back(std::unique_ptr<JsonObject>(tmp_jsonobj));
+          current_jsonobj = tmp_jsonobj;
+
         }
         else if (c == '"'){
           if ( i == json.length() -1) {
@@ -192,6 +240,14 @@ std::string JsonParser::toString(JsonObject* jsonobj) {
     return "\"" + jsonobj->stringValue + "\"";
   }
 
+  if (jsonobj->type == NULL_VALUE) {
+    return "\"" + jsonobj->propertyName + "\":null";
+  }
+
+  if (jsonobj->type == NULL_ONLY) {
+    return "null";
+  }
+
   if (jsonobj->type == INTEGER) {
     return "\"" + jsonobj->propertyName + "\":" + std::to_string(jsonobj->integerValue);
   }
@@ -273,6 +329,9 @@ JsonType JsonParser::getType(char c)
     }
     else if (c == '[') {
       return ARRAY;
+    }
+    else if (c == 'n') {
+      return NULL_VALUE;
     }
     else if (isdigit(c)) {
       return INTEGER;

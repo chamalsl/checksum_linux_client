@@ -93,7 +93,7 @@ MainWindow::MainWindow()
     m_loginBtn.set_label("Logout");
   }
 
-  
+  m_resultText.set_wrap_mode(Gtk::WrapMode::WRAP_CHAR);
   m_resultText.set_left_margin(15);
   m_resultText.set_editable(false);
   show_all_children();
@@ -157,6 +157,7 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
   }
 
   unsigned char *sha_256_hash;
+  unsigned char *sha_512_hash;
   size_t read_count = 0;
   size_t read_size = 1048576;
   size_t hundred_mb = 104857600;
@@ -172,26 +173,35 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
   }
   std::ifstream file_stream(file_path, std::ios_base::binary);
 
-  EVP_MD_CTX *evp_ctx = EVP_MD_CTX_new();
-  if (evp_ctx == NULL){
+  EVP_MD_CTX *evp_ctx_256 = EVP_MD_CTX_new();
+  EVP_MD_CTX *evp_ctx_512 = EVP_MD_CTX_new();
+  
+  if (evp_ctx_256 == NULL || evp_ctx_512 == NULL){
     result->m_resultType = Result::RESULT_TYPE::WRONG;
-    result->m_message = "Error occurred while calculating sha 256.!";
+    result->m_message = "Error occurred while calculating checksums.!";
     p_dispatcher->emit();
     return result;
   }
 
-  if (EVP_DigestInit_ex(evp_ctx, EVP_sha256(), NULL) != 1){
+  if (EVP_DigestInit_ex(evp_ctx_256, EVP_sha256(), NULL) != 1){
     result->m_resultType = Result::RESULT_TYPE::WRONG;
     result->m_message = "Error occurred while calculating sha 256.!";
+    ERROR;
+  }
+
+  if (EVP_DigestInit_ex(evp_ctx_512, EVP_sha512(), NULL) != 1){
+    result->m_resultType = Result::RESULT_TYPE::WRONG;
+    result->m_message = "Error occurred while calculating sha 512.!";
     ERROR;
   }
   
   while (!file_stream.eof()) {
     file_stream.read(data, read_size);
     if (file_stream.gcount()){
-      if (EVP_DigestUpdate(evp_ctx, data, file_stream.gcount()) != 1){
+      if (EVP_DigestUpdate(evp_ctx_256, data, file_stream.gcount()) != 1  
+          || EVP_DigestUpdate(evp_ctx_512, data, file_stream.gcount()) != 1 ){
         result->m_resultType = Result::RESULT_TYPE::WRONG;
-        result->m_message = "Error occurred while calculating sha 256.!";
+        result->m_message = "Error occurred while calculating checksums.!";
         ERROR;
       }else {
         read_count = read_count + file_stream.gcount();
@@ -210,16 +220,32 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
     result->m_message = "Could not allocate memory.!";
     ERROR;
   }
-
-  EVP_DigestFinal_ex(evp_ctx, sha_256_hash, NULL);
-  
+  EVP_DigestFinal_ex(evp_ctx_256, sha_256_hash, NULL);
   std::string local_sha256 = Utils::toHex(sha_256_hash, digest_size);
+
+  digest_size = EVP_MD_size(EVP_sha512());
+  sha_512_hash = (unsigned char*)OPENSSL_malloc(digest_size);
+  if (!sha_512_hash){
+    result->m_resultType = Result::RESULT_TYPE::WRONG;
+    result->m_message = "Could not allocate memory.!";
+    ERROR;
+  }
+  EVP_DigestFinal_ex(evp_ctx_512, sha_512_hash, NULL);
+  std::string local_sha512 = Utils::toHex(sha_512_hash, digest_size);
+  
+  OPENSSL_free(sha_256_hash);
+  OPENSSL_free(sha_512_hash);
+  EVP_MD_CTX_free(evp_ctx_256);
+  EVP_MD_CTX_free(evp_ctx_512);
+
   task_status->percentage = 95;
   p_dispatcher->emit();
 
   std::transform(local_sha256.begin(), local_sha256.end(), local_sha256.begin(), static_cast<int(*)(int)>(std::tolower));
+  std::transform(local_sha512.begin(), local_sha512.end(), local_sha512.begin(), static_cast<int(*)(int)>(std::tolower));
   std::string file_name = std::filesystem::path(file_path).filename();
-  std::pair<short, std::string> response = Api::findBySha256(local_sha256, apiToken);
+
+  std::pair<short, std::string> response = Api::findByChecksums(local_sha256, local_sha512, apiToken);
   result->m_httpStatus = response.first;
   result->m_message = response.second;
   
@@ -238,8 +264,9 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
   std::unique_ptr<JsonObject> json_obj = json_parser.parseJson(result->m_message);
 
   if (json_obj->type == JsonType::OBJECT && json_obj->arrayItems.size() > 1){
-    result->m_message = Api::getResultToDisplay(json_obj.get(), local_sha256);
-    result->m_resultType = Result::RESULT_TYPE::CORRECT;
+    Result::RESULT_TYPE result_type;
+    result->m_message = Api::getResultToDisplay(json_obj.get(), local_sha256, local_sha512, result_type);
+    result->m_resultType = result_type;
     COMPLETED;
   }
 
@@ -267,24 +294,29 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
   std::string result_message;
   if (json_obj->arrayItems.size() == 0){
     result_message.append("Our database does not have any files with same sha256 checksum.");
-    result_message.append("\n\nSha 256 of Selected file:\n");
+    result_message.append("\n\nSha 256 :\n");
     result_message.append(local_sha256);
+    result_message.append("\n\nSha 512 :\n");
+    result_message.append(local_sha512);
     result->m_resultType = Result::RESULT_TYPE::WARNING;
     result->m_message = result_message;
     COMPLETED;
   }
   else if (json_obj->arrayItems.size() > 1){
     result_message.append("Our database has multiple files with same name.");
-    result_message.append("\nBut none of them have same sha 256!");
-    result_message.append("\n\nSha 256 of Selected file:\n");
+    result_message.append("\nBut none of them have same sha 256 or sha512!");
+    result_message.append("\n\nSha 256 :\n");
     result_message.append(local_sha256);
+    result_message.append("\n\nSha 512 :\n");
+    result_message.append(local_sha512);
     result->m_resultType = Result::RESULT_TYPE::WARNING;
     result->m_message = result_message;
     COMPLETED;
   }
   else if (json_obj->arrayItems.size() == 1){
+    Result::RESULT_TYPE result_type;
     JsonObject* file_json = json_obj->arrayItems.at(0).get();
-    result->m_message = Api::getResultToDisplay(file_json, local_sha256);
+    result->m_message = Api::getResultToDisplay(file_json, local_sha256, local_sha512, result_type);
     result->m_resultType = Result::RESULT_TYPE::WRONG;
     COMPLETED;
   }

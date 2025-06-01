@@ -228,7 +228,7 @@ std::unique_ptr<std::string> Utils::getVersion()
 const SecretSchema* Utils::getSecretStoreSchema()
 {
     static const SecretSchema checksum_token_schema = {
-      "com.rammini.checksums.access_token", SECRET_SCHEMA_NONE,
+      "app.checksums.access_token", SECRET_SCHEMA_NONE,
       {
         {SECRET_STORE_SCHEMA_APPLICATION.c_str(), SECRET_SCHEMA_ATTRIBUTE_STRING}, 
         {SECRET_STORE_SCHEMA_URL.c_str(), SECRET_SCHEMA_ATTRIBUTE_STRING}, 
@@ -242,7 +242,7 @@ bool Utils::storeAccessToken(const char* access_token)
 {
     GError *error = NULL;
     secret_password_store_sync (Utils::getSecretStoreSchema(), SECRET_COLLECTION_DEFAULT,
-                              "com.rammini.checksums Access Token", access_token, NULL, &error,
+                              "checksums.app Access Token", access_token, NULL, &error,
                               SECRET_STORE_SCHEMA_APPLICATION.c_str(), SECRET_STORE_APP_NAME.c_str(),
                               SECRET_STORE_SCHEMA_URL.c_str(), SECRET_STORE_APP_URL.c_str(),
                               NULL);

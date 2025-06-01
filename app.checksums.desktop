@@ -2,9 +2,9 @@
 Version={VERSION}
 Type=Application
 Name=Checksums
-Comment=Application to verify file integrity with online service https://checksums.rammini.com.
+Comment=Application to verify file integrity with online service https://checksums.app
 TryExec=checksums
 Exec=checksums
 Categories=Utility
-Icon=com.rammini.checksums.svg
+Icon=app.checksums.svg
 StartupWMClass=checksums

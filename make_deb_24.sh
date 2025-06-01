@@ -10,10 +10,10 @@ touch ${RELEASE_DIR}/DEBIAN/control
 
 cp build/release/checksums release/Ubuntu24/
 cp build/release/checksums ${RELEASE_DIR}/usr/local/bin/checksums
-cp com.rammini.checksums.desktop ${RELEASE_DIR}/usr/share/applications/
-cp com.rammini.checksums.svg ${RELEASE_DIR}/usr/share/pixmaps/
+cp app.checksums.desktop ${RELEASE_DIR}/usr/share/applications/
+cp app.checksums.svg ${RELEASE_DIR}/usr/share/pixmaps/
 
-sed -i "s/{VERSION}/${VERSION}/" ${RELEASE_DIR}/usr/share/applications/com.rammini.checksums.desktop
+sed -i "s/{VERSION}/${VERSION}/" ${RELEASE_DIR}/usr/share/applications/app.checksums.desktop
 
 echo "Package: checksums" > ${RELEASE_DIR}/DEBIAN/control
 echo "Version: ${VERSION}" >> ${RELEASE_DIR}/DEBIAN/control

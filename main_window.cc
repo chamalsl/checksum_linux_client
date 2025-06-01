@@ -40,7 +40,7 @@ MainWindow::MainWindow()
   m_aboutDialog.set_logo(Gdk::Pixbuf::create_from_resource("/images/coconut.png"));
   m_aboutDialog.set_version(*m_version.get());
   m_aboutDialog.set_program_name("CheckSums");
-  m_aboutDialog.set_copyright("checksums.rammini.com");
+  m_aboutDialog.set_copyright("checksums.app");
   m_aboutDialog.set_license_type(Gtk::License::LICENSE_MIT_X11);
   std::vector<Glib::ustring> list_authors;
   list_authors.push_back("Chamal De Silva");

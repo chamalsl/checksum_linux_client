@@ -4,7 +4,7 @@ Application to verify checksums of files.
 ## Install .deb file
 
 1. Download .deb file from either of these web pages.   
-   a). https://checksums.rammini.com/   
+   a). https://checksums.app/   
    b). https://github.com/chamalsl/checksum_linux_client/releases
 2. Run this command to install.
    `sudo apt install ./checksums_{VERSION}_amd64.deb`   

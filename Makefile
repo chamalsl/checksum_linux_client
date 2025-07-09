@@ -20,7 +20,7 @@ VPATH=$(BUILD_DIR)third_party/json_parser/
 CC=g++
 
 _OBJ := token_window.o main_window.o utils.o resources.o api.o third_party/json_parser/json_parser.o
-_TEST_OBJ := utils_unittest.o
+_TEST_OBJ := utils_unittest.o api_unittest.o
 OBJ := ${patsubst %,${BUILD_DIR}%,${_OBJ}}
 TEST_OBJ := ${patsubst %,${BUILD_DIR}%,${_TEST_OBJ}}
 $(shell mkdir -p $(BUILD_DIR))
@@ -35,6 +35,13 @@ ${BUILD_DIR}%.o: %.cc
 ${BUILD_DIR}checksums: $(OBJ)
 	$(CC) ${LDFLAGS} -o ${BUILD_DIR}checksums shasums.cc $^ `pkg-config --cflags --libs gtkmm-3.0 libcurl libcrypto libsecret-1`
 
+${BUILD_DIR}run_tests: $(OBJ) $(TEST_OBJ)
+	$(CC) ${LDFLAGS} -o ${BUILD_DIR}run_tests run_tests.cc /usr/lib/x86_64-linux-gnu/libgtest.a $^ `pkg-config --cflags --libs gtkmm-3.0 libcurl libcrypto libsecret-1`
+
+.PHONY: tests
+tests: ${BUILD_DIR}run_tests
+
+.PHONY: clean
 clean:
 	echo "Removing build files"
 	rm ${BUILD_DIR}*.o 

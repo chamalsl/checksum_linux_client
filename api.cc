@@ -60,24 +60,30 @@ std::string Api::getResultToDisplay(JsonObject *file_json, std::string local_fil
 
   result.append("File name: ");
   result.append(file_name_json->stringValue);
-  result.append("\n");
+  if (public_json->integerValue == 0) {
+    result.append("\n(Personal file)");
+  }
+  result.append("\n\n");
 
   if (local_file_sha512 == remote_sha512sum){
     matched = true;
-    result.append("Sha512 matched !\n\n");
-    result_type = Result::RESULT_TYPE::CORRECT;
+    result.append("Sha512 matched!\n");
   }
-  else if (local_file_sha256 == remote_sha256sum){
+  
+  if (local_file_sha256 == remote_sha256sum){
     matched = true;
-    result.append("Sha256 matched !\n\n");
-    result_type = Result::RESULT_TYPE::CORRECT;
-  }else {
-    matched = false;
+    result.append("Sha256 matched!\n");
+  }
+  if (!matched) {
     result.append("Checksums did NOT match!\n\n");
     result_type = Result::RESULT_TYPE::WRONG;
+  }else{
+    result_type = Result::RESULT_TYPE::CORRECT;
   }
 
-  result.append("Sha 512: ");
+  result.append("\nChecksums of selected file \n");
+  result.append("__________________________ \n");
+  result.append("\nSha 512: ");
   result.append(local_file_sha512);
   result.append("\n");
   result.append("\n");
@@ -89,20 +95,15 @@ std::string Api::getResultToDisplay(JsonObject *file_json, std::string local_fil
 
   if (!matched) {
     result.append("Checksums in our Database \n");
-    result.append("Sha 512: ");
-    if (remote_sha512sum.empty()){
-      result.append("Not available");
-    }else {
+    result.append("_________________________ \n");
+    if (!remote_sha512sum.empty()){
+      result.append("\nSha 512: ");
       result.append(remote_sha512sum);
+      result.append("\n");  
     }
-    
-    result.append("\n");
-    result.append("\n");
 
-    result.append("Sha 256: ");
-    if (remote_sha256sum.empty()){
-      result.append("Not available");
-    } else {
+    if (!remote_sha256sum.empty()){
+      result.append("\nSha 256: ");
       result.append(remote_sha256sum);
     }
     result.append("\n");
@@ -117,5 +118,20 @@ std::string Api::getResultToDisplay(JsonObject *file_json, std::string local_fil
     result.append(release_date_json->stringValue);
     result.append("\n");
   }
+
+  std::string not_available_str;
+  if (remote_sha256sum.empty()){
+    not_available_str.append("sha 256\n");
+  }
+
+   if(remote_sha512sum.empty()){
+    not_available_str.append("sha 512\n");
+  }
+
+  if (!not_available_str.empty()){
+    result.append("\n* These checksums were not available in our database.\n");
+    result.append(not_available_str);
+  }
+
   return result;
 }

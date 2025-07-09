@@ -44,7 +44,6 @@ private:
   void displayResult(std::string message, Result::RESULT_TYPE result);
   void enableButtons(bool enable);
   void showAbout();
-  std::string jsonFileToString(JsonObject* file_json, std::string local_file_sha256);
   std::string m_file_path;
   std::string m_apiToken;
   TaskStatus m_taskStatus;

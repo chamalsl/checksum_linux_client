@@ -294,7 +294,7 @@ std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string f
 
   std::string result_message;
   if (json_obj->arrayItems.size() == 0){
-    result_message.append("Our database does not have any files with same sha256 checksum.");
+    result_message.append("Our database does not have any files with same checksum or filename.");
     result_message.append("\n\nSha 256 :\n");
     result_message.append(local_sha256);
     result_message.append("\n\nSha 512 :\n");

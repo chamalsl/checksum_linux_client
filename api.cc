@@ -41,6 +41,7 @@ std::string Api::getResultToDisplay(JsonObject *file_json, std::string local_fil
   JsonObject* remote_sha256_json = JsonParser::findByPropertyName(file_json, "sha256sum");
   JsonObject* remote_sha512_json = JsonParser::findByPropertyName(file_json, "sha512sum");
   JsonObject* software_name_json = JsonParser::findByPropertyName(file_json, "software_name");
+  JsonObject* version_json = JsonParser::findByPropertyName(file_json, "version");
   JsonObject* release_date_json = JsonParser::findByPropertyName(file_json, "release_date");
   JsonObject* file_name_json = JsonParser::findByPropertyName(file_json, "file_name");
   JsonObject* public_json = JsonParser::findByPropertyName(file_json, "public");
@@ -113,6 +114,9 @@ std::string Api::getResultToDisplay(JsonObject *file_json, std::string local_fil
   if (public_json->integerValue == 1) {
     result.append("Software: ");
     result.append(software_name_json->stringValue);
+    result.append("\n");
+    result.append("Version: ");
+    result.append(version_json->stringValue);
     result.append("\n");
     result.append("Release date: ");
     result.append(release_date_json->stringValue);

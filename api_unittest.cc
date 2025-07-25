@@ -9,7 +9,7 @@
 //Sha256 and Sha512 matched. (Public file.)
 TEST(ApiTest, GetResultToDisplay_1) {
     Api api;
-    std::string input = "{\"file_name\":\"test.exe\",\"sha512sum\":\"162b0b32f02482d5aca0a7c93dd03ceac3acd7e410a5f18f3fb990fc958ae0df6f32233b91831eaf99ca581a8c4ddf9c8ba315ac482db6d4ea01cc7884a635be\",\"sha256sum\":\"87428fc522803d31065e7bce3cf03fe475096631e5e07bbd7a0fde60c4cf25c7\",\"release_date\":\"2025-05-22\",\"software_name\":\"TestSoft\",\"public\":1}";
+    std::string input = "{\"file_name\":\"test.exe\",\"sha512sum\":\"162b0b32f02482d5aca0a7c93dd03ceac3acd7e410a5f18f3fb990fc958ae0df6f32233b91831eaf99ca581a8c4ddf9c8ba315ac482db6d4ea01cc7884a635be\",\"sha256sum\":\"87428fc522803d31065e7bce3cf03fe475096631e5e07bbd7a0fde60c4cf25c7\",\"release_date\":\"2025-05-22\",\"software_name\":\"TestSoft\",\"version\":\"1.0.1\",\"public\":1}";
     JsonParser parser;
     std::unique_ptr api_result = parser.parseJson(input);
     std::string expected = 
@@ -21,6 +21,7 @@ TEST(ApiTest, GetResultToDisplay_1) {
         "\nSha 512: 162b0b32f02482d5aca0a7c93dd03ceac3acd7e410a5f18f3fb990fc958ae0df6f32233b91831eaf99ca581a8c4ddf9c8ba315ac482db6d4ea01cc7884a635be\n\n"
         "Sha 256: 87428fc522803d31065e7bce3cf03fe475096631e5e07bbd7a0fde60c4cf25c7\n\n"
         "\nSoftware: TestSoft\n"
+        "Version: 1.0.1\n"
         "Release date: 2025-05-22\n";
 
     Result::RESULT_TYPE result_type;
@@ -45,6 +46,7 @@ TEST(ApiTest, GetResultToDisplay_2) {
         "\nSha 512: 162b0b32f02482d5aca0a7c93dd03ceac3acd7e410a5f18f3fb990fc958ae0df6f32233b91831eaf99ca581a8c4ddf9c8ba315ac482db6d4ea01cc7884a635be\n\n"
         "Sha 256: 87428fc522803d31065e7bce3cf03fe475096631e5e07bbd7a0fde60c4cf25c7\n\n"
         "\nSoftware: TestSoft\n"
+        "Version: \n"
         "Release date: 2025-05-22\n\n"
         "* These checksums were not available in our database.\n"
         "sha 512\n";
@@ -71,6 +73,7 @@ TEST(ApiTest, GetResultToDisplay_3) {
         "\nSha 512: 162b0b32f02482d5aca0a7c93dd03ceac3acd7e410a5f18f3fb990fc958ae0df6f32233b91831eaf99ca581a8c4ddf9c8ba315ac482db6d4ea01cc7884a635be\n\n"
         "Sha 256: 87428fc522803d31065e7bce3cf03fe475096631e5e07bbd7a0fde60c4cf25c7\n\n"
         "\nSoftware: TestSoft\n"
+        "Version: \n"
         "Release date: 2025-05-22\n\n"
         "* These checksums were not available in our database.\n"
         "sha 256\n";
@@ -101,6 +104,7 @@ TEST(ApiTest, GetResultToDisplay_4) {
         "\nSha 512: f62b0b32f02482d5aca0a7c93dd03ceac3acd7e410a5f18f3fb990fc958ae0df6f32233b91831eaf99ca581a8c4ddf9c8ba315ac482db6d4ea01cc7884a635be\n\n"
         "Sha 256: f7428fc522803d31065e7bce3cf03fe475096631e5e07bbd7a0fde60c4cf25c7\n"
         "\nSoftware: TestSoft\n"
+        "Version: \n"
         "Release date: 2025-05-22\n";
 
     Result::RESULT_TYPE result_type;
@@ -130,6 +134,7 @@ TEST(ApiTest, GetResultToDisplay_5) {
         "_________________________ \n"
         "\nSha 512: f62b0b32f02482d5aca0a7c93dd03ceac3acd7e410a5f18f3fb990fc958ae0df6f32233b91831eaf99ca581a8c4ddf9c8ba315ac482db6d4ea01cc7884a635be\n\n"
         "\nSoftware: TestSoft\n"
+        "Version: \n"
         "Release date: 2025-05-22\n"
         "\n* These checksums were not available in our database.\n"
         "sha 256\n";
@@ -161,6 +166,7 @@ TEST(ApiTest, GetResultToDisplay_6) {
         "_________________________ \n"
         "\nSha 256: f7428fc522803d31065e7bce3cf03fe475096631e5e07bbd7a0fde60c4cf25c7\n"
         "\nSoftware: TestSoft\n"
+        "Version: \n"
         "Release date: 2025-05-22\n"
         "\n* These checksums were not available in our database.\n"
         "sha 512\n";

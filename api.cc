@@ -116,7 +116,9 @@ std::string Api::getResultToDisplay(JsonObject *file_json, std::string local_fil
     result.append(software_name_json->stringValue);
     result.append("\n");
     result.append("Version: ");
-    result.append(version_json->stringValue);
+    if (version_json){
+      result.append(version_json->stringValue);
+    }     
     result.append("\n");
     result.append("Release date: ");
     result.append(release_date_json->stringValue);

@@ -1,0 +1,21 @@
+[Desktop Entry]
+Name=checksums-app
+Comment=A fantastic new application packaged as a snap.
+# The Type must be Application for a launchable program
+Type=Application
+#
+# The Exec line is CRITICAL. It specifies the command to run.
+# Format: Exec=<snap-name>.<app-name> [arguments]
+# Since the snap name (my-super-app) is different from the app name (my-app),
+# the full command wrapper is required.
+# If snap-name and app-name were the same (e.g., both 'my-app'), you could use Exec=my-app
+Exec=checksums-app
+#
+# The Icon path should point to the icon file within the snap's structure.
+# Snapcraft automatically re-locates icons placed in snap/gui/ to a place the desktop can find.
+Icon=${SNAP}/meta/gui/app.checksums.svg
+#
+# Keywords help users search for the application in the menu
+Keywords=utility;tool;snap;
+Categories=Utility;
+StartupNotify=true

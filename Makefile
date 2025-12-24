@@ -41,6 +41,10 @@ ${BUILD_DIR}run_tests: $(OBJ) $(TEST_OBJ)
 .PHONY: tests
 tests: ${BUILD_DIR}run_tests
 
+install:
+	mkdir -p $(DESTDIR)/bin
+	cp ${BUILD_DIR}checksums $(DESTDIR)/bin/
+
 .PHONY: clean
 clean:
 	echo "Removing build files"

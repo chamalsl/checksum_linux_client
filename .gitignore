@@ -1,4 +1,7 @@
 /.vscode
 /build
 /release
+**/*.log
+**/*.snap
+**/*.deb
 

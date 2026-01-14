@@ -39,5 +39,5 @@ For release builds, executable will be saved in build/release/checksums.
 
 ## Build Snap Package for Development
 1. `export SNAPCRAFT_BUILD_ENVIRONMENT=multipass` - This is required if you have docker installed.
-2. `snapcraft pack`
+2. `snapcraft pack --verbose`
 3. `sudo snap install checksums-app_{VERSION}_amd64.snap --dangerous --devmode`

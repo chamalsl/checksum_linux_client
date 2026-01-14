@@ -1,23 +1,32 @@
-name: checksums-app # you probably want to 'snapcraft register <name>'
-base: core24 # the base snap is the execution environment for this snap
-version: '1.0.2' # just for humans, typically '1.2+git' or '1.3.2'
-summary: Single-line elevator pitch for your amazing snap # 79 char long summary
+name: checksums-app
+base: core24
+version: '1.0.2'
+title: Checksums App
+contact: support@rammini.com
+license: MIT
+issues: https://github.com/chamalsl/checksum_linux_client/issues
+source-code: https://github.com/chamalsl/checksum_linux_client
+website: https://checksums.app/
+summary: Application to calculate and verify SHA-256 and SHA-512 checksums.
 description: |
-  This is my-snap's description. You have a paragraph or two to tell the
-  most important story about your snap. Keep it under 100 words though,
-  we live in tweetspace and your description wants to look good in the snap
-  store.
+  This application will calculate SHA-512 checksums of your files.
+  Then verify those checksums with checksums stored at https://checksums.app.
 
-grade: devel # must be 'stable' to release into candidate/stable channels
-confinement: devmode # use 'strict' once you have the right plugs and slots
+grade: stable #devel 
+confinement: strict #devmode 
 
+slots:
+  dbus-app-checksums: 
+    interface: dbus
+    bus: session 
+    name: app.checksums # MUST match the D-Bus name your app tries to register
+    
 parts:    
   checksums-app:
-    # See 'snapcraft plugins'
     plugin: make
     source: .
     make-parameters:
-      - BUILD=debug
+      - BUILD=release
     build-packages:
       - g++
       - make
@@ -36,13 +45,15 @@ apps:
     environment:
       LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP_DESKTOP_RUNTIME/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libproxy:$SNAP_DESKTOP_RUNTIME/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gio/modules
     command: bin/checksums
+    #desktop: snap/gui/app.checksums.desktop
     extensions: [gnome]
+    slots: [dbus-app-checksums]
     plugs:
       - network
       - home
       - desktop
-      - x11
-      - wayland
-
+      - mount-control
+      - mount-observe
+      - removable-media
     
 

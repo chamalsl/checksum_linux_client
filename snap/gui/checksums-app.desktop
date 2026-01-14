@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=checksums-app
+Comment=You can use this application to calculate SHA-256 and SHA-512 checksums of your files. Then verify the integrity with https://checksums.app.
+Type=Application
+Exec=checksums-app
+Icon=${SNAP}/meta/gui/checksums-app.svg
+Keywords=utility;tool;snap;
+Categories=Utility;
+Terminal=false

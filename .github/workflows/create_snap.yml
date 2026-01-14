@@ -1,0 +1,21 @@
+name: Create Snap
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        id: create-snap
+        uses: snapcore/action-build@v1
+
+      - name: Upload snap as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snap-artifact
+          path: ${{ steps.build-snap.outputs.snap }}
+

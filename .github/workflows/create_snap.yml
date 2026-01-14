@@ -17,5 +17,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: snap-artifact
-          path: ${{ steps.build-snap.outputs.snap }}
+          path: ${{ steps.create-snap.outputs.snap }}
 

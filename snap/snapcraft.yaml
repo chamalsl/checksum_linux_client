@@ -7,9 +7,10 @@ license: MIT
 issues: https://github.com/chamalsl/checksum_linux_client/issues
 source-code: https://github.com/chamalsl/checksum_linux_client
 website: https://checksums.app/
+icon: icon.svg
 summary: Application to calculate and verify SHA-256 and SHA-512 checksums.
 description: |
-  This application will calculate SHA-512 checksums of your files.
+  This application will calculate SHA-256 and SHA-512 checksums of your file.
   Then verify those checksums with checksums stored at https://checksums.app.
 
 grade: stable #devel 
@@ -43,7 +44,7 @@ parts:
 apps:
   checksums-app:
     environment:
-      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP_DESKTOP_RUNTIME/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libproxy:$SNAP_DESKTOP_RUNTIME/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gio/modules
+      #LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP_DESKTOP_RUNTIME/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libproxy:$SNAP_DESKTOP_RUNTIME/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gio/modules
     command: bin/checksums
     #desktop: snap/gui/app.checksums.desktop
     extensions: [gnome]

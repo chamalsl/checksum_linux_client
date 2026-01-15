@@ -1,6 +1,11 @@
 name: Create Snap
 on:
   workflow_dispatch:
+      inputs:
+        tag:
+          description: 'Tag of the existing release'
+          required: true
+          type: string
 
 jobs:
   build:
@@ -13,9 +18,10 @@ jobs:
         id: create-snap
         uses: snapcore/action-build@v1
 
-      - name: Upload snap as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: snap-artifact
-          path: ${{ steps.create-snap.outputs.snap }}
+      - name: Upload snap to release
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+        run: |
+          gh release upload ${{ github.event.inputs.tag }} ${{ steps.create-snap.outputs.snap }}
+
 

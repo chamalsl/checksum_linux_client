@@ -55,6 +55,7 @@ MainWindow::MainWindow()
 
   m_mainContainer.set_homogeneous(false);
   m_fileNameText.set_width_chars(40);
+  m_fileNameText.set_editable(false);
   m_addForm.pack_start(m_fileNameText, false, false, 5);
   //m_browseBtn.set_sensitive(false);
   //m_checkBtn.set_sensitive(false);

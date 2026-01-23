@@ -40,6 +40,7 @@ protected:
   
 private:
   void startVerifying();
+  void onFileSelected(int responseId);
   void onResultReceived();
   void displayResult(std::string message, Result::RESULT_TYPE result);
   void enableButtons(bool enable);
@@ -51,6 +52,7 @@ private:
   Glib::RefPtr<Gdk::Pixbuf> m_correct;
   Glib::RefPtr<Gdk::Pixbuf> m_wrong;
   Glib::RefPtr<Gdk::Pixbuf> m_warning;
+  Glib::RefPtr<Gtk::FileChooserNative> m_file_dialog;
   Glib::Dispatcher m_Dispatcher;
   std::unique_ptr<std::string> m_version;
   std::future<std::unique_ptr<Result>> m_futureResult;

@@ -88,6 +88,11 @@ MainWindow::MainWindow()
   m_loginWindow->set_transient_for(*this);
   m_loginWindow->set_position(Gtk::WIN_POS_CENTER_ON_PARENT);
 
+  m_file_dialog = Gtk::FileChooserNative::create("Select File", *this, Gtk::FILE_CHOOSER_ACTION_OPEN, "Select", "Cancel");
+  m_file_dialog->set_transient_for(*this);
+  m_file_dialog->set_modal(true);
+  m_file_dialog->signal_response().connect(sigc::mem_fun(*this, &MainWindow::onFileSelected));
+
   m_apiToken = Utils::getAccessToken();
   if (!m_apiToken.empty()){
     m_loginBtn.set_label("Logout");
@@ -102,29 +107,13 @@ MainWindow::MainWindow()
 
 void MainWindow::selectFile(){
   //std::cout << "Opening File Chooser\n";
-  Gtk::FileChooserDialog file_dialog("Select File", Gtk::FILE_CHOOSER_ACTION_OPEN);
-  file_dialog.set_transient_for(*this);
-  file_dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
-  file_dialog.add_button("Select", Gtk::RESPONSE_OK);
+  
+  //file_dialog.set_transient_for(*this);
+  //file_dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+  //file_dialog.add_button("Select", Gtk::RESPONSE_OK);
 
-  int result = file_dialog.run();
-
-  switch(result){
-    case(Gtk::RESPONSE_OK):{
-      m_file_path = file_dialog.get_filename();
-      //std::cout << "File Selected " << m_file_path << "\n";
-      m_fileNameText.set_text(m_file_path);
-      displayResult("",Result::RESULT_TYPE::EMPTY);
-      break;
-    }
-    case(Gtk::RESPONSE_CANCEL):{
-      break;
-    }
-    default:{
-      break;
-    }
-  }
-
+  //int result = file_dialog.run();
+  m_file_dialog->show();
 }
 
 std::unique_ptr<Result> verifyFile(Glib::Dispatcher* p_dispatcher, std::string file_path_str, 
@@ -364,6 +353,25 @@ void MainWindow::startVerifying(){
   m_progressBar.set_fraction(0);
   enableButtons(false);
   m_futureResult = std::async(std::launch::async,verifyFile, &m_Dispatcher, m_file_path, m_apiToken, &m_taskStatus);
+}
+
+void MainWindow::onFileSelected(int response_id)
+{
+  switch (response_id){
+    case Gtk::ResponseType::RESPONSE_ACCEPT:{
+      m_file_path = m_file_dialog->get_file()->get_path();
+      m_fileNameText.set_text(m_file_path);
+      displayResult("",Result::RESULT_TYPE::EMPTY);
+      break;
+    }
+    case Gtk::ResponseType::RESPONSE_CANCEL:{
+      break;
+    }
+    default:{
+      break;
+    }
+  }
+
 }
 
 void MainWindow::handleLoginAndLogout()

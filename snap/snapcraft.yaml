@@ -1,6 +1,6 @@
 name: checksums-app
 base: core24
-version: '1.0.2'
+adopt-info: version-provider
 title: Checksums App
 contact: support@rammini.com
 license: MIT
@@ -22,12 +22,25 @@ slots:
     bus: session 
     name: app.checksums # MUST match the D-Bus name your app tries to register
     
-parts:    
+parts: 
+  version-provider:
+    plugin: dump
+    source: .
+    override-pull: |
+      craftctl default
+      VERSION=$(cat VERSION)
+      craftctl set version="$VERSION"   
+
   checksums-app:
     plugin: make
     source: .
     make-parameters:
       - BUILD=release
+    override-build: |
+      echo "Generate resources.cc\n"
+      rm resources.cc
+      glib-compile-resources --target=resources.cc --generate-source resources.xml
+      craftctl default
     build-packages:
       - g++
       - make
@@ -53,8 +66,5 @@ apps:
       - network
       - home
       - desktop
-      - mount-control
-      - mount-observe
-      - removable-media
     
 

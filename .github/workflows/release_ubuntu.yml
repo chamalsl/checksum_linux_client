@@ -31,6 +31,9 @@ jobs:
     #  uses: anchore/sbom-action@v0
     #  with:
     #    output-file: release/Ubuntu24/is-online_sbom.spdx
+    - name: make_snap
+      id: create-snap
+      uses: snapcore/action-build@v1
     - name: Generate artifact attestation
       uses: actions/attest-build-provenance@v2
       with:
@@ -38,6 +41,7 @@ jobs:
          build/release/checksums
          release/Ubuntu24/checksums_${{github.event.release.tag_name}}_amd64.deb
          release/Ubuntu24/SHASUMS
+         ${{ steps.create-snap.outputs.snap }}
     #- name: Generate SBOM attestation
     #  uses: actions/attest-sbom@v1
     #  with:
@@ -50,3 +54,4 @@ jobs:
         gh release upload ${{github.event.release.tag_name}} release/Ubuntu24/checksums_${{github.event.release.tag_name}}_amd64.deb
         gh release upload ${{github.event.release.tag_name}} release/Ubuntu24/checksums
         gh release upload ${{github.event.release.tag_name}} release/Ubuntu24/SHASUMS
+        gh release upload ${{github.event.release.tag_name}} ${{ steps.create-snap.outputs.snap }}
